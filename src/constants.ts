@@ -1,0 +1,2 @@
+export const MIN_SECONDS_BETWEEN_DUCKS = 2 * 60 * 60
+export const MAX_SECONDS_BEFORE_QUACK = 30
