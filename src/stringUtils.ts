@@ -1,3 +1,5 @@
+import {UserScore} from "./interfaces";
+
 export const getDuck = () => {
   const ducks = [
     '\u200B\u30FB\u309C\u309C\u30FB\u3002\u3002 \u200B \u30FB\u309C\u309C\\\\\u200B_0< FLAP F\u200BLAP!',
@@ -19,4 +21,20 @@ export const getBefFailureMessage = () => {
     'The duck said no, maybe bribe it with some pizza? Ducks love pizza don\'t they? You can try again in 7 seconds.'
   ]
   return failureMessages[Math.floor(Math.random() * failureMessages.length)]
+}
+export const getBangNotQuackedMessage = () => {
+  return 'There is no duck. What are you shooting at?'
+}
+export const getBefNotQuackedMessage = () => {
+  return 'You tried befriending a non-existent duck. That\'s freaking creepy.'
+}
+
+export function matchesCommand(content: string, command: String) {
+  return content.toLowerCase().includes(`.${command}`);
+}
+
+export function formatScores(scores: UserScore[]) {
+  return scores.reduce((acc, current) => {
+    return `${acc}\n <@${current.userId}>: ${current.score}`
+  }, '')
 }

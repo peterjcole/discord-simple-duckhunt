@@ -2,14 +2,34 @@ import {firestore} from "firebase-admin/lib/firestore"
 import Timestamp = firestore.Timestamp
 
 export interface Status {
-  [guild: string]: GuildStatus
+  [guildId: string]: GuildStatus
 }
 
 export interface GuildStatus {
   nextWakingAt: Timestamp,
   quackedAt: Timestamp | null,
+  guildUserStats: GuildUserStats
 }
-// alive and quacked: shootable
-// alive and not quacked: about to quack, not shootable
-// not alive and quacked: dead
-// not alive and not quacked: dead
+
+export interface GuildUserStats {
+  [userId: string]: GuildUser
+}
+
+export interface GuildUser {
+  numKilled: number,
+  numBefriended: number
+}
+
+export interface MessageHelper {
+  actionString: string,
+  statsString: string,
+  failureMessageGetter: () => string,
+  notQuackedMessageGetter: () => string,
+  incrementer: (guildUserStats: GuildUserStats, authorId: string) => { newGuildUserStats: GuildUserStats, newNum: number }
+}
+
+export interface UserScore {
+  userId: string,
+  score: number
+}
+
