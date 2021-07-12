@@ -1,10 +1,10 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
-
 import * as Discord from 'discord.js'
-import {Status} from "./Interfaces"
+
+import {Status} from "./interfaces"
 import {getStatusFromDb, updateDbStatus} from "./firebase"
-import {timeForDuck} from "./statusUtils"
+import {getGuildStatus, timeForDuck} from "./statusUtils"
 import {handleBang, handleBef, quack} from "./messageHandlers";
 
 
@@ -18,15 +18,25 @@ client.on('ready', async () => {
 })
 
 client.on('message', async (msg: Discord.Message) => {
-  if (msg.content.includes('.bang')) {
-    status = handleBang(msg, status)
-  } else if (msg.content.includes('.bef')) {
-    status = handleBef(msg, status)
-  } else if (timeForDuck(msg, status)) {
-    status = await quack(msg, status)
-  }
+  const guildStatus = getGuildStatus(msg, status)
+  console.log('guild status: ' + JSON.stringify(guildStatus))
 
-  updateDbStatus(status)
+  if(!msg.guild) {
+    console.log('Guild missing from msg object')
+  } else {
+    if (msg.content.includes('.bang')) {
+      status[msg.guild.id] = handleBang(msg, guildStatus)
+      updateDbStatus(status)
+    }
+    else if (msg.content.includes('.bef')) {
+      status[msg.guild.id] = handleBef(msg, guildStatus)
+      updateDbStatus(status)
+    }
+    else if (timeForDuck(guildStatus)) {
+      status[msg.guild.id] = quack(msg, guildStatus)
+      updateDbStatus(status)
+    }
+  }
 })
 
 client.login(process.env.DISCORD_BOT_TOKEN)

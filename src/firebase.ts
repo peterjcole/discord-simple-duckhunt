@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 import * as admin from 'firebase-admin'
 
-import {Status} from "./Interfaces"
+import {Status} from "./interfaces"
 
 const serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '', 'base64').toString('ascii'))
 

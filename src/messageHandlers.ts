@@ -1,50 +1,57 @@
 import * as Discord from "discord.js";
-import {Status} from "./Interfaces";
+
+import {GuildStatus} from "./interfaces";
 import {getBangFailureMessage, getBefFailureMessage, getDuck} from "./strings";
 import {MAX_SECONDS_BEFORE_QUACK} from "./constants";
-import {getGuildStatus, newStatus, playerSucceeds, setGuildStatus, timeSinceChange} from "./statusUtils";
+import {
+  duckHasQuacked,
+  getNextScheduledStatus,
+  getNextWakingAt,
+  getQuackedAt,
+  newStatus,
+  playerSucceeds,
+  timeForDuck,
+  timeSinceChange
+} from "./statusUtils";
 
-export const handleBang = (msg: Discord.Message, status: Status) => {
-  let guildStatus = getGuildStatus(msg, status)
-
-  if (guildStatus.alive) {
+export const handleBang = (msg: Discord.Message, guildStatus: GuildStatus) => {
+  if (duckHasQuacked(guildStatus)) {
     // TODO: You have killed 1163 ducks in #.
     if (playerSucceeds()) {
       msg.reply(`you shot a duck in ${timeSinceChange(guildStatus)} seconds!`)
-      guildStatus = newStatus(false)
+      return getNextScheduledStatus()
     } else {
       msg.reply(getBangFailureMessage())
     }
   } else {
     msg.reply('There is no duck. What are you shooting at?')
   }
-  return setGuildStatus(msg, status, guildStatus)
+  return guildStatus;
 }
 
-export const handleBef = (msg: Discord.Message, status: Status) => {
-  let guildStatus = getGuildStatus(msg, status)
+export const handleBef = (msg: Discord.Message, guildStatus: GuildStatus) => {
 
-  if (guildStatus.alive) {
+  if (duckHasQuacked(guildStatus)) {
     // TODO: You have made friends with 542 ducks in #
     if (playerSucceeds()) {
       msg.reply(`you befriended a duck in ${timeSinceChange(guildStatus)} seconds!`)
-      guildStatus = newStatus(false)
+      return getNextScheduledStatus()
     } else {
       msg.reply(getBefFailureMessage())
     }
   } else {
     msg.reply('You tried befriending a non-existent duck. That\'s freaking creepy.')
   }
-  return setGuildStatus(msg, status, guildStatus)
+  return guildStatus;
 }
 
-export const quack = async (msg: Discord.Message, status: Status) => {
-  if (!getGuildStatus(msg, status).quacked) {
+export const quack = (msg: Discord.Message, guildStatus: GuildStatus) => {
+  if (!duckHasQuacked(guildStatus) && timeForDuck(guildStatus)) {
     const timeout = Math.floor(Math.random() * MAX_SECONDS_BEFORE_QUACK * 1000)
     scheduleQuack(msg, timeout)
-    return setGuildStatus(msg, status, newStatus(true, true))
+    return newStatus(getNextWakingAt(), getQuackedAt(timeout));
   } else {
-    return status
+    return guildStatus
   }
 }
 
