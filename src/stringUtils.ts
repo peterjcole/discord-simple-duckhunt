@@ -35,7 +35,11 @@ export function matchesCommand(content: string, command: String) {
 
 export function formatScores(scores: UserScore[]) {
   return scores.reduce((acc, current) => {
-    return `${acc}\n <@${current.userId}>: ${current.score}`
+    if (current.score) {
+      return `${acc}\n <@${current.userId}>: ${current.score}`
+    } else {
+      return acc
+    }
   }, '') || 'No scores yet :('
 }
 
