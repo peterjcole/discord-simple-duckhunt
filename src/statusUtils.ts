@@ -36,26 +36,37 @@ export const getGuildStatus = (msg: Discord.Message, status: Status) => {
   }
 }
 
-export const timeSinceChange = (guildStatus: GuildStatus) => guildStatus.quackedAt && (new Date().getTime() - guildStatus.quackedAt.toDate().getTime()) / 1000
+export const elapsedTime = (guildStatus: GuildStatus) => guildStatus.quackedAt ? (new Date().getTime() - guildStatus.quackedAt.toDate().getTime()): -1
 
 export const timeForDuck = (guildStatus: GuildStatus) => guildStatus.nextWakingAt.toDate().getTime() < new Date().getTime()
 
 export const playerSucceeds = () => (Math.random() > 0.1)
 
-export function incrementBef(guildUserStats: GuildUserStats, authorId: string) {
+export function incrementBef(guildUserStats: GuildUserStats, authorId: string, elapsedTime: number) {
   if (!guildUserStats[authorId]) {
-    guildUserStats[authorId] = {numKilled: 0, numBefriended: 0}
+    guildUserStats[authorId] = {numKilled: 0, numBefriended: 0, bestBefriendedTime: elapsedTime, bestKilledTime: null}
   }
-  const newNum = guildUserStats[authorId].numBefriended + 1
-  guildUserStats[authorId].numBefriended = newNum
-  return {newGuildUserStats: guildUserStats, newNum}
+
+  const userStats = guildUserStats[authorId]
+  userStats.numBefriended += 1
+
+  if (!userStats.bestBefriendedTime || userStats.bestBefriendedTime > elapsedTime) {
+    userStats.bestBefriendedTime = elapsedTime
+  }
+
+  return {newGuildUserStats: guildUserStats, newNum: userStats.numBefriended}
 }
 
-export function incrementBang(guildUserStats: GuildUserStats, authorId: string) {
+export function incrementBang(guildUserStats: GuildUserStats, authorId: string, elapsedTime: number) {
   if (!guildUserStats[authorId]) {
-    guildUserStats[authorId] = {numKilled: 0, numBefriended: 0}
+    guildUserStats[authorId] = {numKilled: 0, numBefriended: 0, bestBefriendedTime: null, bestKilledTime: elapsedTime}
   }
-  const newNum = guildUserStats[authorId].numKilled + 1
-  guildUserStats[authorId].numKilled = newNum
-  return {newGuildUserStats: guildUserStats, newNum}
+  const userStats = guildUserStats[authorId]
+  userStats.numKilled += 1
+
+  if (!userStats.bestKilledTime || userStats.bestKilledTime > elapsedTime) {
+    userStats.bestKilledTime = elapsedTime
+  }
+
+  return {newGuildUserStats: guildUserStats, newNum: userStats.numKilled}
 }

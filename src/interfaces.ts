@@ -17,7 +17,9 @@ export interface GuildUserStats {
 
 export interface GuildUser {
   numKilled: number,
-  numBefriended: number
+  numBefriended: number,
+  bestKilledTime: number | null,
+  bestBefriendedTime: number | null
 }
 
 export interface MessageHelper {
@@ -25,11 +27,12 @@ export interface MessageHelper {
   statsString: string,
   failureMessageGetter: () => string,
   notQuackedMessageGetter: () => string,
-  incrementer: (guildUserStats: GuildUserStats, authorId: string) => { newGuildUserStats: GuildUserStats, newNum: number }
+  incrementer: (guildUserStats: GuildUserStats, authorId: string, timeElapsed: number) => { newGuildUserStats: GuildUserStats, newNum: number }
 }
 
 export interface UserScore {
   userId: string,
-  score: number
+  score: number,
+  bestTime: number | null
 }
 

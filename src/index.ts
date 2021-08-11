@@ -3,8 +3,8 @@ import * as Discord from 'discord.js'
 
 import {Status} from "./interfaces"
 import {getStatusFromDb, updateDbStatus} from "./firebase"
-import {getGuildStatus, timeForDuck} from "./statusUtils"
-import {handleBang, handleBef, handleFriends, handleKillers, quack} from "./handleKillers";
+import {duckHasQuacked, getGuildStatus, timeForDuck} from "./statusUtils"
+import {handleBang, handleBef, handleFriends, handleKillers, quack} from "./messageHandlers";
 import {matchesCommand} from "./stringUtils";
 
 dotenv.config()
@@ -21,8 +21,6 @@ client.on('ready', async () => {
 
 client.on('message', async (msg: Discord.Message) => {
   const guildStatus = getGuildStatus(msg, status)
-  console.log('guild status: ' + JSON.stringify(guildStatus))
-
   if (!msg.guild) {
     console.log('Guild missing from msg object')
   } else {
@@ -39,8 +37,7 @@ client.on('message', async (msg: Discord.Message) => {
       handleFriends(msg, guildStatus)
     } else if (matchesCommand(msg.content, 'killers')) {
       handleKillers(msg, guildStatus)
-
-    } else if (timeForDuck(guildStatus)) {
+    } else if (timeForDuck(guildStatus) && !duckHasQuacked(guildStatus)) {
       status[msg.guild.id] = quack(msg, guildStatus)
       updateDbStatus(status)
     }

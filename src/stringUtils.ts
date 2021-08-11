@@ -36,5 +36,15 @@ export function matchesCommand(content: string, command: String) {
 export function formatScores(scores: UserScore[]) {
   return scores.reduce((acc, current) => {
     return `${acc}\n <@${current.userId}>: ${current.score}`
-  }, '')
+  }, '') || 'No scores yet :('
+}
+
+export const formatTimes = (scores: UserScore[]) => {
+  return scores.reduce((acc, current) => {
+    if (current.bestTime) {
+      return `${acc}\n <@${current.userId}>: ${current.bestTime / 1000} seconds`
+    } else {
+      return acc
+    }
+  }, '') || 'No times yet :('
 }

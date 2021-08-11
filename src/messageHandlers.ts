@@ -2,7 +2,7 @@ import * as Discord from "discord.js";
 
 import {GuildStatus, MessageHelper} from "./interfaces";
 import {
-  formatScores,
+  formatScores, formatTimes,
   getBangFailureMessage,
   getBangNotQuackedMessage,
   getBefFailureMessage,
@@ -19,8 +19,7 @@ import {
   incrementBef,
   newStatus,
   playerSucceeds,
-  timeForDuck,
-  timeSinceChange
+  elapsedTime
 } from "./statusUtils";
 import {getBangScores, getBefScores} from "./scoreUtils";
 
@@ -44,8 +43,9 @@ const befHelpers = {
 const handle = (msg: Discord.Message, guildStatus: GuildStatus, helpers: MessageHelper) => {
   if (duckHasQuacked(guildStatus)) {
     if (playerSucceeds()) {
-      const {newGuildUserStats, newNum} = helpers.incrementer(guildStatus.guildUserStats, msg.author.id)
-      msg.reply(`you ${helpers.actionString} a duck in ${timeSinceChange(guildStatus)} seconds! You have ${helpers.statsString} ${newNum} ${newNum === 1 ? 'duck' : 'ducks'} in this server.`)
+      const time = elapsedTime(guildStatus)
+      const {newGuildUserStats, newNum} = helpers.incrementer(guildStatus.guildUserStats, msg.author.id, time)
+      msg.reply(`you ${helpers.actionString} a duck in ${time / 1000} seconds! You have ${helpers.statsString} ${newNum} ${newNum === 1 ? 'duck' : 'ducks'} in this server.`)
       return getNextScheduledStatus(newGuildUserStats)
     } else {
       // TODO: cooldown
@@ -67,13 +67,9 @@ export const handleBang = (msg: Discord.Message, guildStatus: GuildStatus) => {
 }
 
 export const quack = (msg: Discord.Message, guildStatus: GuildStatus) => {
-  if (!duckHasQuacked(guildStatus) && timeForDuck(guildStatus)) {
-    const timeout = Math.floor(Math.random() * MAX_SECONDS_BEFORE_QUACK * 1000)
-    scheduleQuack(msg, timeout)
-    return newStatus(getNextWakingAt(), getQuackedAt(timeout), guildStatus.guildUserStats);
-  } else {
-    return guildStatus
-  }
+  const timeout = Math.floor(Math.random() * MAX_SECONDS_BEFORE_QUACK * 1000)
+  scheduleQuack(msg, timeout)
+  return newStatus(getNextWakingAt(), getQuackedAt(timeout), guildStatus.guildUserStats);
 }
 
 const scheduleQuack = async (msg: Discord.Message, timeout: number) => {
@@ -83,11 +79,12 @@ const scheduleQuack = async (msg: Discord.Message, timeout: number) => {
 
 export const handleFriends = (msg: Discord.Message, guildStatus: GuildStatus) => {
   const scores = getBefScores(guildStatus)
-  console.log(scores)
-
   const friendsEmbed = new Discord.MessageEmbed()
       .setTitle('Duck friend scores in this server')
-      .setDescription(formatScores(scores))
+      .addFields(
+          {name: 'Best friends', value: formatScores(scores), inline: true},
+          {name: 'Fastest friends', value: formatTimes(scores), inline: true},
+      )
 
   msg.channel.send(friendsEmbed)
 };
@@ -98,7 +95,10 @@ export const handleKillers = (msg: Discord.Message, guildStatus: GuildStatus) =>
 
   const friendsEmbed = new Discord.MessageEmbed()
       .setTitle('Duck killer scores in this server')
-      .setDescription(formatScores(scores))
+      .addFields(
+          {name: 'Nastiest murderers', value: formatScores(scores), inline: true},
+          {name: 'Quickest gunslingers', value: formatTimes(scores), inline: true},
+      )
 
   msg.channel.send(friendsEmbed)
 };
