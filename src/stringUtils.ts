@@ -34,9 +34,11 @@ export function matchesCommand(content: string, command: String) {
 }
 
 export function formatScores(scores: UserScore[]) {
-  return scores.reduce((acc, current) => {
+  return scores
+      .sort((firstScore: UserScore, secondScore: UserScore) => secondScore.score - firstScore.score)
+      .reduce((acc, current) => {
     if (current.score) {
-      return `${acc}\n <@${current.userId}>: ${current.score}`
+      return `${acc}\n<@${current.userId}>: ${current.score}`
     } else {
       return acc
     }
@@ -44,9 +46,11 @@ export function formatScores(scores: UserScore[]) {
 }
 
 export const formatTimes = (scores: UserScore[]) => {
-  return scores.reduce((acc, current) => {
+  return scores
+      .sort((firstScore: UserScore, secondScore: UserScore) => firstScore.bestTime && secondScore.bestTime ? firstScore.bestTime - secondScore.bestTime : 0)
+      .reduce((acc, current) => {
     if (current.bestTime) {
-      return `${acc}\n <@${current.userId}>: ${current.bestTime / 1000} seconds`
+      return `${acc}\n<@${current.userId}>: ${current.bestTime / 1000} seconds`
     } else {
       return acc
     }
