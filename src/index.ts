@@ -23,7 +23,7 @@ client.on('message', async (msg: Discord.Message) => {
   const guildStatus = getGuildStatus(msg, status)
   if (!msg.guild) {
     console.log('Guild missing from msg object')
-  } else {
+  } else if (!msg.system && !msg.author.bot) {
     if (matchesCommand(msg.content, 'bang')) {
       status[msg.guild.id] = handleBang(msg, guildStatus)
       updateDbStatus(status)
