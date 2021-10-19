@@ -68,6 +68,8 @@ export const handleBang = (msg: Discord.Message, guildStatus: GuildStatus) => {
 
 export const quack = (msg: Discord.Message, guildStatus: GuildStatus) => {
   const timeout = Math.floor(Math.random() * MAX_SECONDS_BEFORE_QUACK * 1000)
+
+  // we want this to happen asynchronously, so don't need to do anything with the promise
   scheduleQuack(msg, timeout)
   return newStatus(getNextWakingAt(), getQuackedAt(timeout), guildStatus.guildUserStats);
 }

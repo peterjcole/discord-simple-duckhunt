@@ -1,2 +1,18 @@
 export const MIN_SECONDS_BETWEEN_DUCKS = 2 * 60 * 60
+
 export const MAX_SECONDS_BEFORE_QUACK = 30
+
+export const DUCKS = [
+  '\u200B\u30FB\u309C\u309C\u30FB\u3002\u3002 \u200B \u30FB\u309C\u309C\\\\\u200B_0< FLAP F\u200BLAP!',
+  '\u30FB \u200B \u309C\u309C\u30FB\u3002\u3002\u30FB\u309C\u309C\\\\\u200B_\u00F3< quac\u200Bk!',
+]
+
+export const HALLOWEEN_DUCKS = [
+  '\u200B\u30FB\u309C\u309C\u30FB\u3002\u3002 \u200B \u30FB\u309C\u309C\\\\\u200B_0< FLAP F\u200BLAP! 🦆 🎃',
+  '\u30FB \u200B \u309C\u309C\u30FB\u3002\u3002\u30FB\u309C\u309C\\\\\u200B_\u00F3< CAW CAW! 👻 🦆',
+]
+
+export const HOLIDAY_DUCKS = [
+  '\u200B\u30FB\u309C\u309C\u30FB\u3002\u3002 \u200B \u30FB\u309C\u309C\\\\\u200B_0< FLAP F\u200BLAP! 🎄 🦆',
+  '\u30FB \u200B \u309C\u309C\u30FB\u3002\u3002\u30FB\u309C\u309C\\\\\u200B_\u00F3< quack! 🦆 🎅',
+]

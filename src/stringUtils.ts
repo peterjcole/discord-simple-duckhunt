@@ -1,12 +1,24 @@
-import {UserScore} from "./interfaces";
+import {Ducks, UserScore} from "./interfaces";
+import {DUCKS, HALLOWEEN_DUCKS, HOLIDAY_DUCKS} from './constants';
 
 export const getDuck = () => {
-  const ducks = [
-    '\u200B\u30FB\u309C\u309C\u30FB\u3002\u3002 \u200B \u30FB\u309C\u309C\\\\\u200B_0< FLAP F\u200BLAP!',
-    '\u30FB \u200B \u309C\u309C\u30FB\u3002\u3002\u30FB\u309C\u309C\\\\\u200B_\u00F3< quac\u200Bk!',
-  ]
+  // month is zero indexed
+  const month = new Date().getMonth()
+
+  switch (month) {
+    case 9:
+      return getRandom(HALLOWEEN_DUCKS)
+    case 11:
+      return getRandom(HOLIDAY_DUCKS)
+    default:
+      return getRandom(DUCKS)
+  }
+}
+
+const getRandom = (ducks: Ducks) => {
   return ducks[Math.floor(Math.random() * ducks.length)]
 }
+
 export const getBangFailureMessage = () => {
   const failureMessages = [
     'Your gun jammed! You can try again in 7 seconds.',

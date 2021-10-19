@@ -36,3 +36,4 @@ export interface UserScore {
   bestTime: number | null
 }
 
+export type Ducks = string[]
