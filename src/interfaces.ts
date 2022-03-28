@@ -8,7 +8,14 @@ export interface Status {
 export interface GuildStatus {
   nextWakingAt: Timestamp,
   quackedAt: Timestamp | null,
-  guildUserStats: GuildUserStats
+  guildUserStats: GuildUserStats,
+  guildSettings: GuildSettings
+}
+
+export interface GuildSettings {
+  minSecondsBetweenDucks: number
+  maxSecondsBeforeQuack: number
+  chanceOfDuckAwakening: number
 }
 
 export interface GuildUserStats {
@@ -27,8 +34,11 @@ export interface MessageHelper {
   statsString: string,
   failureMessageGetter: () => string,
   notQuackedMessageGetter: () => string,
-  incrementer: (guildUserStats: GuildUserStats, authorId: string, timeElapsed: number) => { newGuildUserStats: GuildUserStats, newNum: number }
+  incrementer: Incrementer
 }
+
+type Incrementer = (guildUserStats: GuildUserStats, authorId: string, timeElapsed: number) =>
+  { newGuildUserStats: GuildUserStats, newNum: number }
 
 export interface UserScore {
   userId: string,

@@ -1,26 +1,31 @@
-import * as Discord from "discord.js"
-import {MIN_SECONDS_BETWEEN_DUCKS} from "./constants"
-import {GuildStatus, GuildUserStats, Status} from "./interfaces"
-import {firestore} from "firebase-admin/lib/firestore"
-import Timestamp = firestore.Timestamp;
+import * as Discord from 'discord.js'
+import {
+  DEFAULT_CHANCE_OF_DUCK_AWAKENING,
+  DEFAULT_MAX_SECONDS_BEFORE_QUACK,
+  DEFAULT_MIN_SECONDS_BETWEEN_DUCKS,
+} from './constants'
+import { GuildSettings, GuildStatus, GuildUserStats, Status } from './interfaces'
+import { firestore } from 'firebase-admin/lib/firestore'
+import Timestamp = firestore.Timestamp
 
-export const newStatus = (nextWakingAt: Timestamp, quackedAt: Timestamp | null, guildUserStats: GuildUserStats) => {
+export const newStatus = (nextWakingAt: Timestamp, quackedAt: Timestamp | null, guildUserStats: GuildUserStats, guildSettings: GuildSettings) => {
   return {
     nextWakingAt,
     quackedAt,
-    guildUserStats
+    guildUserStats,
+    guildSettings
   }
 }
 
 export const duckHasQuacked = (guildStatus: GuildStatus) => guildStatus.quackedAt && guildStatus.quackedAt.toMillis() < Timestamp.fromDate(new Date()).toMillis();
 
-export const getNextWakingAt = () => Timestamp.fromDate(new Date(new Date().getTime() + MIN_SECONDS_BETWEEN_DUCKS * 1000));
+export const getNextWakingAt = (guildSettings: GuildSettings) => Timestamp.fromDate(new Date(new Date().getTime() + guildSettings.minSecondsBetweenDucks * 1000));
 
-export const getNextScheduledStatus = (guildUserStats: GuildUserStats) => newStatus(getNextWakingAt(), null, guildUserStats);
+export const getNextScheduledStatus = (guildUserStats: GuildUserStats, guildSettings: GuildSettings) => newStatus(getNextWakingAt(guildSettings), null, guildUserStats, guildSettings);
 
 export const getQuackedAt = (timeout: number) => Timestamp.fromDate(new Date(new Date().getTime() + timeout));
 
-const initialiseGuildStatus = () => newStatus(Timestamp.fromDate(new Date()), null, {});
+const initialiseGuildStatus = () => newStatus(Timestamp.fromDate(new Date()), null, {}, getDefaultGuildSettings());
 
 export const getGuildStatus = (msg: Discord.Message, status: Status) => {
   if (!msg.guild) {
@@ -32,6 +37,9 @@ export const getGuildStatus = (msg: Discord.Message, status: Status) => {
     if (!guildStatus.guildUserStats) {
       guildStatus.guildUserStats = {}
     }
+    if(!guildStatus.guildSettings) {
+      guildStatus.guildSettings = getDefaultGuildSettings()
+    }
     return guildStatus;
   }
 }
@@ -39,6 +47,8 @@ export const getGuildStatus = (msg: Discord.Message, status: Status) => {
 export const elapsedTime = (guildStatus: GuildStatus) => guildStatus.quackedAt ? (new Date().getTime() - guildStatus.quackedAt.toDate().getTime()): -1
 
 export const timeForDuck = (guildStatus: GuildStatus) => guildStatus.nextWakingAt.toDate().getTime() < new Date().getTime()
+
+export const duckWakesUp = (guildSettings: GuildSettings) => Math.random() > guildSettings.chanceOfDuckAwakening
 
 export const playerSucceeds = () => (Math.random() > 0.1)
 
@@ -70,3 +80,9 @@ export function incrementBang(guildUserStats: GuildUserStats, authorId: string, 
 
   return {newGuildUserStats: guildUserStats, newNum: userStats.numKilled}
 }
+
+export const getDefaultGuildSettings = () => ({
+  chanceOfDuckAwakening: DEFAULT_CHANCE_OF_DUCK_AWAKENING,
+  maxSecondsBeforeQuack: DEFAULT_MAX_SECONDS_BEFORE_QUACK,
+  minSecondsBetweenDucks: DEFAULT_MIN_SECONDS_BETWEEN_DUCKS,
+})

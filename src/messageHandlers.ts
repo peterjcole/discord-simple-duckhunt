@@ -9,7 +9,6 @@ import {
   getBefNotQuackedMessage,
   getDuck
 } from "./stringUtils";
-import {MAX_SECONDS_BEFORE_QUACK} from "./constants";
 import {
   duckHasQuacked,
   getNextScheduledStatus,
@@ -46,7 +45,7 @@ const handle = (msg: Discord.Message, guildStatus: GuildStatus, helpers: Message
       const time = elapsedTime(guildStatus)
       const {newGuildUserStats, newNum} = helpers.incrementer(guildStatus.guildUserStats, msg.author.id, time)
       msg.reply(`you ${helpers.actionString} a duck in ${time / 1000} seconds! You have ${helpers.statsString} ${newNum} ${newNum === 1 ? 'duck' : 'ducks'} in this server.`)
-      return getNextScheduledStatus(newGuildUserStats)
+      return getNextScheduledStatus(newGuildUserStats, guildStatus.guildSettings)
     } else {
       // TODO: cooldown
       msg.reply(helpers.failureMessageGetter())
@@ -67,11 +66,11 @@ export const handleBang = (msg: Discord.Message, guildStatus: GuildStatus) => {
 }
 
 export const quack = (msg: Discord.Message, guildStatus: GuildStatus) => {
-  const timeout = Math.floor(Math.random() * MAX_SECONDS_BEFORE_QUACK * 1000)
+  const timeout = Math.floor(Math.random() * guildStatus.guildSettings.maxSecondsBeforeQuack * 1000)
 
   // we want this to happen asynchronously, so don't need to do anything with the promise
   scheduleQuack(msg, timeout)
-  return newStatus(getNextWakingAt(), getQuackedAt(timeout), guildStatus.guildUserStats);
+  return newStatus(getNextWakingAt(guildStatus.guildSettings), getQuackedAt(timeout), guildStatus.guildUserStats, guildStatus.guildSettings);
 }
 
 const scheduleQuack = async (msg: Discord.Message, timeout: number) => {

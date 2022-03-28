@@ -3,9 +3,10 @@ import * as Discord from 'discord.js'
 
 import {Status} from "./interfaces"
 import {getStatusFromDb, updateDbStatus} from "./firebase"
-import {duckHasQuacked, getGuildStatus, timeForDuck} from "./statusUtils"
+import { duckHasQuacked, duckWakesUp, getGuildStatus, timeForDuck } from './statusUtils'
 import {handleBang, handleBef, handleFriends, handleKillers, quack} from "./messageHandlers";
 import {matchesCommand} from "./stringUtils";
+import * as fs from 'fs'
 
 dotenv.config()
 
@@ -15,6 +16,7 @@ let status: Status
 
 client.on('ready', async () => {
   status = await getStatusFromDb()
+  await fs.writeFileSync('./backup.json', JSON.stringify(status))
   console.log(`Logged in as ${client.user && client.user.tag}!`)
 })
 
@@ -37,7 +39,7 @@ client.on('message', async (msg: Discord.Message) => {
       handleFriends(msg, guildStatus)
     } else if (matchesCommand(msg.content, 'killers')) {
       handleKillers(msg, guildStatus)
-    } else if (timeForDuck(guildStatus) && !duckHasQuacked(guildStatus)) {
+    } else if (timeForDuck(guildStatus) && !duckHasQuacked(guildStatus) && duckWakesUp(guildStatus.guildSettings)) {
       status[msg.guild.id] = quack(msg, guildStatus)
       updateDbStatus(status)
     }

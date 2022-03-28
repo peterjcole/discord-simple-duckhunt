@@ -121,3 +121,4 @@ dist
 .DS_Store
 
 serviceAccountKey.json
+backup.json
